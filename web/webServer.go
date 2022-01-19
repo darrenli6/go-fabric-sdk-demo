@@ -6,7 +6,7 @@ package web
 import (
 	"net/http"
 	"fmt"
-	"github.com/kongyixueyuan.com/kongyixueyuan/web/controller"
+	"github.com/kevin-hf/kongyixueyuan/web/controller"
 )
 
 func  WebStart(app *controller.Application)  {

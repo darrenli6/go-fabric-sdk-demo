@@ -14,9 +14,10 @@ import (
 	"github.com/hyperledger/fabric-sdk-go/pkg/common/errors/retry"
     
 	"github.com/hyperledger/fabric-sdk-go/pkg/fab/ccpackager/gopackager"
-	"github.com/hyperledger/fabric-sdk-go/third_party/github.com/hyperledger/fabric/common/cauthdsl"
+
 	"github.com/hyperledger/fabric-sdk-go/pkg/client/channel"
 
+     "github.com/hyperledger/fabric-sdk-go/third_party/github.com/hyperledger/fabric/common/policydsl"
 )
 
 
@@ -28,6 +29,9 @@ func SetupSDK(ConfigFile string, initialized bool) (*fabsdk.FabricSDK, error) {
 	if initialized {
 		return nil, fmt.Errorf("Fabric SDK已被实例化")
 	}
+
+
+
 
 	sdk, err := fabsdk.New(config.FromFile(ConfigFile))
 	if err != nil {
@@ -106,7 +110,8 @@ func InstallAndInstantiateCC(sdk *fabsdk.FabricSDK, info *InitInfo) (*channel.Cl
 	fmt.Println("开始实例化链码......")
 
 	//  returns a policy that requires one valid
-	ccPolicy := cauthdsl.SignedByAnyMember([]string{"org1.kevin.kongyixueyuan.com"})
+	ccPolicy := policydsl.SignedByAnyMember([]string{"org1.kevin.kongyixueyuan.com"})
+
 
 	instantiateCCReq := resmgmt.InstantiateCCRequest{Name: info.ChaincodeID, Path: info.ChaincodePath, Version: ChaincodeVersion, Args: [][]byte{[]byte("init")}, Policy: ccPolicy}
 	// instantiates chaincode with optional custom options (specific peers, filtered peers, timeout). If peer(s) are not specified
