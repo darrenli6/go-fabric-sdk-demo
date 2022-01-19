@@ -5,7 +5,7 @@ package controller
 
 import (
 	"net/http"
-	"github.com/kevin-hf/kongyixueyuan/service"
+	"github.com/darrenli6/go-fabric-sdk-demo/service"
 )
 
 type Application struct {

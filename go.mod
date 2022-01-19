@@ -1,4 +1,4 @@
-module github.com/kevin-hf/kongyixueyuan
+module github.com/darrenli6/go-fabric-sdk-demo
 
 go 1.17
 
@@ -14,7 +14,7 @@ require (
 	github.com/golang/protobuf v1.3.3 // indirect
 	github.com/google/certificate-transparency-go v1.0.21 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
-	github.com/hyperledger/fabric v2.1.1+incompatible // indirect
+	github.com/hyperledger/fabric v1.0.0 // indirect
 	github.com/hyperledger/fabric-amcl v0.0.0-20210603140002-2670f91851c8 // indirect
 	github.com/hyperledger/fabric-config v0.0.5 // indirect
 	github.com/hyperledger/fabric-lib-go v1.0.0 // indirect

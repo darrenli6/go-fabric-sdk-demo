@@ -7,10 +7,10 @@ package main
 import (
 	"os"
 	"fmt"
-	"github.com/kevin-hf/kongyixueyuan/sdkInit"
-	"github.com/kevin-hf/kongyixueyuan/service"
-	"github.com/kevin-hf/kongyixueyuan/web"
-	"github.com/kevin-hf/kongyixueyuan/web/controller"
+	"github.com/darrenli6/go-fabric-sdk-demo/sdkInit"
+	"github.com/darrenli6/go-fabric-sdk-demo/service"
+	"github.com/darrenli6/go-fabric-sdk-demo/web"
+	"github.com/darrenli6/go-fabric-sdk-demo/web/controller"
 )
 
 const (
@@ -24,7 +24,7 @@ func main() {
 	initInfo := &sdkInit.InitInfo{
 
 		ChannelID: "kevinkongyixueyuan",
-		ChannelConfig: os.Getenv("GOPATH") + "/src/github.com/kevin-hf/kongyixueyuan/fixtures/artifacts/channel.tx",
+		ChannelConfig: os.Getenv("GOPATH") + "/src/github.com/darrenli6/go-fabric-sdk-demo/fixtures/artifacts/channel.tx",
 
 		OrgAdmin:"Admin",
 		OrgName:"Org1",
@@ -32,7 +32,7 @@ func main() {
 
 		ChaincodeID: SimpleCC,
 		ChaincodeGoPath: os.Getenv("GOPATH"),
-		ChaincodePath: "github.com/kevin-hf/kongyixueyuan/chaincode/",
+		ChaincodePath: "github.com/darrenli6/go-fabric-sdk-demo/chaincode/",
 		UserName:"User1",
 	}
 

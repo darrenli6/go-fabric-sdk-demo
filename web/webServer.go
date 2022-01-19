@@ -6,7 +6,7 @@ package web
 import (
 	"net/http"
 	"fmt"
-	"github.com/kevin-hf/kongyixueyuan/web/controller"
+	"github.com/darrenli6/go-fabric-sdk-demo/web/controller"
 )
 
 func  WebStart(app *controller.Application)  {
