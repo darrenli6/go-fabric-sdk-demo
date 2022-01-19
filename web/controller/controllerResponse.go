@@ -1,6 +1,7 @@
 /**
-  author: kevin
- */
+  @Author : hanxiaodong
+*/
+
 package controller
 
 import (
@@ -10,20 +11,22 @@ import (
 	"fmt"
 )
 
-func showView(w http.ResponseWriter, r *http.Request, templateName string, data interface{})  {
-	page := filepath.Join("web", "tpl", templateName)
+func ShowView(w http.ResponseWriter, r *http.Request, templateName string, data interface{})  {
 
-	// 创建模板实例
-	resultTemplate, err := template.ParseFiles(page)
+	// 指定视图所在路径
+	pagePath := filepath.Join("web", "tpl", templateName)
+
+	resultTemplate, err := template.ParseFiles(pagePath)
 	if err != nil {
-		fmt.Println("创建模板实例错误: ", err)
+		fmt.Printf("创建模板实例错误: %v", err)
 		return
 	}
 
-	// 融合数据
 	err = resultTemplate.Execute(w, data)
 	if err != nil {
-		fmt.Println("融合模板数据时发生错误", err)
+		fmt.Printf("在模板中融合数据时发生错误: %v", err)
+		//fmt.Fprintf(w, "显示在客户端浏览器中的错误信息")
 		return
 	}
+
 }

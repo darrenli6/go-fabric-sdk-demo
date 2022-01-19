@@ -1,71 +1,305 @@
 /**
-  author: kevin
- */
+  @Prject: goProjects
+  @Dev_Software: GoLand
+  @File : controllerHandler
+  @Time : 2018/10/18 14:31 
+  @Author : hanxiaodong
+*/
+
 package controller
 
 import (
 	"net/http"
+	"encoding/json"
 	"github.com/darrenli6/go-fabric-sdk-demo/service"
+	"fmt"
 )
 
-type Application struct {
-	Fabric *service.ServiceSetup
+var cuser User
+
+func (app *Application) LoginView(w http.ResponseWriter, r *http.Request)  {
+
+	ShowView(w, r, "login.html", nil)
 }
 
-func (app *Application) IndexView(w http.ResponseWriter, r *http.Request){
-	showView(w, r, "index.html", nil)
+func (app *Application) Index(w http.ResponseWriter, r *http.Request)  {
+	ShowView(w, r, "index.html", nil)
 }
 
-func (app *Application) SetInfoView(w http.ResponseWriter, r *http.Request)  {
-	showView(w, r, "setInfo.html", nil)
-}
-
-// 根据指定的 key 设置/修改 value 信息
-func (app *Application) SetInfo(w http.ResponseWriter, r *http.Request)  {
-	// 获取提交数据
-	name := r.FormValue("name")
-	num := r.FormValue("num")
-
-	// 调用业务层, 反序列化
-	transactionID, err := app.Fabric.SetInfo(name, num)
-
-	// 封装响应数据
+func (app *Application) Help(w http.ResponseWriter, r *http.Request)  {
 	data := &struct {
-		Flag bool
-		Msg string
+		CurrentUser User
 	}{
+		CurrentUser:cuser,
+	}
+	ShowView(w, r, "help.html", data)
+}
+
+// 用户登录
+func (app *Application) Login(w http.ResponseWriter, r *http.Request) {
+	loginName := r.FormValue("loginName")
+	password := r.FormValue("password")
+
+	var flag bool
+	for _, user := range users {
+		if user.LoginName == loginName && user.Password == password {
+			cuser = user
+			flag = true
+			break
+		}
+	}
+
+	data := &struct {
+		CurrentUser User
+		Flag bool
+	}{
+		CurrentUser:cuser,
+		Flag:false,
+	}
+
+	if flag {
+		// 登录成功
+		ShowView(w, r, "index.html", data)
+	}else{
+		// 登录失败
+		data.Flag = true
+		data.CurrentUser.LoginName = loginName
+		ShowView(w, r, "login.html", data)
+	}
+}
+
+// 用户登出
+func (app *Application) LoginOut(w http.ResponseWriter, r *http.Request)  {
+	cuser = User{}
+	ShowView(w, r, "login.html", nil)
+}
+
+// 显示添加信息页面
+func (app *Application) AddEduShow(w http.ResponseWriter, r *http.Request)  {
+	data := &struct {
+		CurrentUser User
+		Msg string
+		Flag bool
+	}{
+		CurrentUser:cuser,
+		Msg:"",
+		Flag:false,
+	}
+	ShowView(w, r, "addEdu.html", data)
+}
+
+// 添加信息
+func (app *Application) AddEdu(w http.ResponseWriter, r *http.Request)  {
+
+	edu := service.Education{
+		Name:r.FormValue("name"),
+		Gender:r.FormValue("gender"),
+		Nation:r.FormValue("nation"),
+		EntityID:r.FormValue("entityID"),
+		Place:r.FormValue("place"),
+		BirthDay:r.FormValue("birthDay"),
+		EnrollDate:r.FormValue("enrollDate"),
+		GraduationDate:r.FormValue("graduationDate"),
+		SchoolName:r.FormValue("schoolName"),
+		Major:r.FormValue("major"),
+		QuaType:r.FormValue("quaType"),
+		Length:r.FormValue("length"),
+		Mode:r.FormValue("mode"),
+		Level:r.FormValue("level"),
+		Graduation:r.FormValue("graduation"),
+		CertNo:r.FormValue("certNo"),
+		Photo:r.FormValue("photo"),
+	}
+
+	app.Setup.SaveEdu(edu)
+	/*transactionID, err := app.Setup.SaveEdu(edu)
+
+	data := &struct {
+		CurrentUser User
+		Msg string
+		Flag bool
+	}{
+		CurrentUser:cuser,
 		Flag:true,
 		Msg:"",
 	}
+
 	if err != nil {
 		data.Msg = err.Error()
 	}else{
-		data.Msg = "操作成功，交易ID: " + transactionID
-	}
+		data.Msg = "信息添加成功:" + transactionID
+	}*/
 
-	// 响应客户端
-	showView(w, r, "setInfo.html", data)
+	//ShowView(w, r, "addEdu.html", data)
+	r.Form.Set("certNo", edu.CertNo)
+	r.Form.Set("name", edu.Name)
+	app.FindCertByNoAndName(w, r)
 }
 
-// 根据指定的 Key 查询信息
-func (app *Application) QueryInfo(w http.ResponseWriter, r *http.Request)  {
-	// 获取提交数据
-	name := r.FormValue("name")
-
-	// 调用业务层, 反序列化
-	msg, err := app.Fabric.GetInfo(name)
-
-	// 封装响应数据
+func (app *Application) QueryPage(w http.ResponseWriter, r *http.Request)  {
 	data := &struct {
+		CurrentUser User
 		Msg string
+		Flag bool
 	}{
+		CurrentUser:cuser,
+		Msg:"",
+		Flag:false,
+	}
+	ShowView(w, r, "query.html", data)
+}
+
+// 根据证书编号与姓名查询信息
+func (app *Application) FindCertByNoAndName(w http.ResponseWriter, r *http.Request)  {
+	certNo := r.FormValue("certNo")
+	name := r.FormValue("name")
+	result, err := app.Setup.FindEduByCertNoAndName(certNo, name)
+	var edu = service.Education{}
+	json.Unmarshal(result, &edu)
+
+	fmt.Println("根据证书编号与姓名查询信息成功：")
+	fmt.Println(edu)
+
+	data := &struct {
+		Edu service.Education
+		CurrentUser User
+		Msg string
+		Flag bool
+		History bool
+	}{
+		Edu:edu,
+		CurrentUser:cuser,
+		Msg:"",
+		Flag:false,
+		History:false,
+	}
+
+	if err != nil {
+		data.Msg = err.Error()
+		data.Flag = true
+	}
+
+	ShowView(w, r, "queryResult.html", data)
+}
+
+func (app *Application) QueryPage2(w http.ResponseWriter, r *http.Request)  {
+	data := &struct {
+		CurrentUser User
+		Msg string
+		Flag bool
+	}{
+		CurrentUser:cuser,
+		Msg:"",
+		Flag:false,
+	}
+	ShowView(w, r, "query2.html", data)
+}
+
+// 根据身份证号码查询信息
+func (app *Application) FindByID(w http.ResponseWriter, r *http.Request)  {
+	entityID := r.FormValue("entityID")
+	result, err := app.Setup.FindEduInfoByEntityID(entityID)
+	var edu = service.Education{}
+	json.Unmarshal(result, &edu)
+
+	data := &struct {
+		Edu service.Education
+		CurrentUser User
+		Msg string
+		Flag bool
+		History bool
+	}{
+		Edu:edu,
+		CurrentUser:cuser,
+		Msg:"",
+		Flag:false,
+		History:true,
+	}
+
+	if err != nil {
+		data.Msg = err.Error()
+		data.Flag = true
+	}
+
+	ShowView(w, r, "queryResult.html", data)
+}
+
+// 修改/添加新信息
+func (app *Application) ModifyShow(w http.ResponseWriter, r *http.Request)  {
+	// 根据证书编号与姓名查询信息
+	certNo := r.FormValue("certNo")
+	name := r.FormValue("name")
+	result, err := app.Setup.FindEduByCertNoAndName(certNo, name)
+
+	var edu = service.Education{}
+	json.Unmarshal(result, &edu)
+
+	data := &struct {
+		Edu service.Education
+		CurrentUser User
+		Msg string
+		Flag bool
+	}{
+		Edu:edu,
+		CurrentUser:cuser,
+		Flag:true,
 		Msg:"",
 	}
+
 	if err != nil {
-		data.Msg = "没有查询到Jack对应的信息"
-	}else{
-		data.Msg = "查询成功: " + msg
+		data.Msg = err.Error()
+		data.Flag = true
 	}
-	// 响应客户端
-	showView(w, r, "queryReq.html", data)
+
+	ShowView(w, r, "modify.html", data)
+}
+
+// 修改/添加新信息
+func (app *Application) Modify(w http.ResponseWriter, r *http.Request) {
+	edu := service.Education{
+		Name:r.FormValue("name"),
+		Gender:r.FormValue("gender"),
+		Nation:r.FormValue("nation"),
+		EntityID:r.FormValue("entityID"),
+		Place:r.FormValue("place"),
+		BirthDay:r.FormValue("birthDay"),
+		EnrollDate:r.FormValue("enrollDate"),
+		GraduationDate:r.FormValue("graduationDate"),
+		SchoolName:r.FormValue("schoolName"),
+		Major:r.FormValue("major"),
+		QuaType:r.FormValue("quaType"),
+		Length:r.FormValue("length"),
+		Mode:r.FormValue("mode"),
+		Level:r.FormValue("level"),
+		Graduation:r.FormValue("graduation"),
+		CertNo:r.FormValue("certNo"),
+		Photo:r.FormValue("photo"),
+	}
+
+	//transactionID, err := app.Setup.ModifyEdu(edu)
+	app.Setup.ModifyEdu(edu)
+
+	/*data := &struct {
+		Edu service.Education
+		CurrentUser User
+		Msg string
+		Flag bool
+	}{
+		CurrentUser:cuser,
+		Flag:true,
+		Msg:"",
+	}
+
+	if err != nil {
+		data.Msg = err.Error()
+	}else{
+		data.Msg = "新信息添加成功:" + transactionID
+	}
+
+	ShowView(w, r, "modify.html", data)
+	*/
+
+	r.Form.Set("certNo", edu.CertNo)
+	r.Form.Set("name", edu.Name)
+	app.FindCertByNoAndName(w, r)
 }

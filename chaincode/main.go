@@ -1,79 +1,47 @@
 /**
-  author: kevin
- */
+  @Author : hanxiaodong
+*/
 
 package main
 
 import (
 	"github.com/hyperledger/fabric/core/chaincode/shim"
-	"github.com/hyperledger/fabric/protos/peer"
 	"fmt"
+	"github.com/hyperledger/fabric/protos/peer"
 )
 
-type SimpleChaincode struct {
+type EducationChaincode struct {
 
-} 
+}
 
-func (t *SimpleChaincode) Init(stub shim.ChaincodeStubInterface) peer.Response{
+func (t *EducationChaincode) Init(stub shim.ChaincodeStubInterface) peer.Response{
 
 	return shim.Success(nil)
 }
 
-func (t *SimpleChaincode) Invoke(stub shim.ChaincodeStubInterface) peer.Response{
+func (t *EducationChaincode) Invoke(stub shim.ChaincodeStubInterface) peer.Response{
+	// 获取用户意图
 	fun, args := stub.GetFunctionAndParameters()
 
-	var result string
-	var err error
-	if fun == "set"{
-		result, err = set(stub, args)
-	}else{
-		result, err = get(stub, args)
-	}
-	if err != nil{
-		return shim.Error(err.Error())
-	}
-	return shim.Success([]byte(result))
-}
-
-func set(stub shim.ChaincodeStubInterface, args []string)(string, error){
-
-	if len(args) != 3{
-		return "", fmt.Errorf("给定的参数个数不符合要求")
+	if fun == "addEdu"{
+		return t.addEdu(stub, args)		// 添加信息
+	}else if fun == "queryEduByCertNoAndName" {
+		return t.queryEduByCertNoAndName(stub, args)		// 根据证书编号及姓名查询信息
+	}else if fun == "queryEduInfoByEntityID" {
+		return t.queryEduInfoByEntityID(stub, args)	// 根据身份证号码及姓名查询详情
+	}else if fun == "updateEdu" {
+		return t.updateEdu(stub, args)		// 根据证书编号更新信息
+	}else if fun == "delEdu"{
+		return t.delEdu(stub, args)	// 根据证书编号删除信息
 	}
 
-	err := stub.PutState(args[0], []byte(args[1]))
-	if err != nil{
-		return "", fmt.Errorf(err.Error())
-	}
-
-	err = stub.SetEvent(args[2], []byte{})
-	if err != nil {
-		return "", fmt.Errorf(err.Error())
-	}
-
-	return string(args[0]), nil
-
-}
-
-func get(stub shim.ChaincodeStubInterface, args []string)(string, error){
-	if len(args) != 1{
-		return "", fmt.Errorf("给定的参数个数不符合要求")
-	}
-	result, err := stub.GetState(args[0])
-	if err != nil{
-		return "", fmt.Errorf("获取数据发生错误")
-	}
-	if result == nil{
-		return "", fmt.Errorf("根据 %s 没有获取到相应的数据", args[0])
-	}
-	return string(result), nil
+	return shim.Error("指定的函数名称错误")
 
 }
 
 func main(){
-	err := shim.Start(new(SimpleChaincode))
+	err := shim.Start(new(EducationChaincode))
 	if err != nil{
-		fmt.Printf("启动SimpleChaincode时发生错误: %s", err)
+		fmt.Printf("启动EducationChaincode时发生错误: %s", err)
 	}
 }
-

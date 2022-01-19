@@ -1,15 +1,27 @@
 /**
   @Author : hanxiaodong
 */
-package service
 
-import (
-	"github.com/hyperledger/fabric-sdk-go/pkg/client/channel"
-	"fmt"
-	"time"
-	"github.com/hyperledger/fabric-sdk-go/pkg/common/providers/fab"
-)
+package main
 
+/**
+姓名：张小三，性别：男，
+
+民族：汉，身份证号：1011010101010101
+
+籍贯：XXX，出生日期：1991年01月01日，			照片，
+
+入学日期：2009年9月，毕（结）业日期：2013年7月，
+
+学校名称：中国政法大学，专业：民商法学，
+
+学历类别：普通，学制：四年，
+
+学习形式：普通全日制，层次：本科，
+
+毕（结）业：毕业，证书编号：11111111111111
+
+ */
 type Education struct {
 	ObjectType	string	`json:"docType"`
 	Name	string	`json:"Name"`		// 姓名
@@ -18,6 +30,7 @@ type Education struct {
 	EntityID	string	`json:"EntityID"`		// 身份证号
 	Place	string	`json:"Place"`		// 籍贯
 	BirthDay	string	`json:"BirthDay"`		// 出生日期
+
 	EnrollDate	string	`json:"EnrollDate"`		// 入学日期
 	GraduationDate	string	`json:"GraduationDate"`	// 毕（结）业日期
 	SchoolName	string	`json:"SchoolName"`	// 学校名称
@@ -37,28 +50,4 @@ type Education struct {
 type HistoryItem struct {
 	TxId	string
 	Education	Education
-}
-
-type ServiceSetup struct {
-	ChaincodeID	string
-	Client	*channel.Client
-}
-
-func regitserEvent(client *channel.Client, chaincodeID, eventID string) (fab.Registration, <-chan *fab.CCEvent) {
-
-	reg, notifier, err := client.RegisterChaincodeEvent(chaincodeID, eventID)
-	if err != nil {
-		fmt.Println("注册链码事件失败: %s", err)
-	}
-	return reg, notifier
-}
-
-func eventResult(notifier <-chan *fab.CCEvent, eventID string) error {
-	select {
-	case ccEvent := <-notifier:
-		fmt.Printf("接收到链码事件: %v\n", ccEvent)
-	case <-time.After(time.Second * 20):
-		return fmt.Errorf("不能根据指定的事件ID接收到相应的链码事件(%s)", eventID)
-	}
-	return nil
 }
